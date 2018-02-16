@@ -40,9 +40,6 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
   ..addFlag('aot',
       help: 'Run compiler in AOT mode (enables whole-program transformations)',
       defaultsTo: false)
-  ..addFlag('strong',
-      help: 'Run compiler in strong mode (uses strong mode semantics)',
-      defaultsTo: false)
   ..addFlag('link-platform',
       help:
           'When in batch mode, link platform kernel file into result kernel file.'
@@ -171,8 +168,7 @@ class _FrontendCompiler implements CompilerInterface {
     final CompilerOptions compilerOptions = new CompilerOptions()
       ..sdkRoot = sdkRoot
       ..packagesFileUri = options['packages'] != null ? Uri.base.resolveUri(new Uri.file(options['packages'])) : null
-      ..strongMode = options['strong']
-      ..target = new FlutterTarget(new TargetFlags(strongMode: options['strong']))
+      ..target = new FlutterTarget(new TargetFlags(strongMode: true))
       ..reportMessages = true;
 
     Program program;
@@ -186,11 +182,7 @@ class _FrontendCompiler implements CompilerInterface {
       if (options['link-platform']) {
         // TODO(aam): Remove linkedDependencies once platform is directly embedded
         // into VM snapshot and http://dartbug.com/30111 is fixed.
-        final String platformKernelDill =
-            options['strong'] ? 'platform_strong.dill' : 'platform.dill';
-        compilerOptions.linkedDependencies = <Uri>[
-          sdkRoot.resolve(platformKernelDill)
-        ];
+        compilerOptions.linkedDependencies = <Uri>[sdkRoot.resolve('platform.dill')];
       }
       program = await _runWithPrintRedirection(() =>
           compileToKernel(filenameUri, compilerOptions, aot: options['aot']));
