@@ -25,7 +25,7 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface{
           transformer: (trackWidgetCreation ? new WidgetCreatorTracker() : null));
 
   @override
-  Future<Null> compile(String filename, ArgResults options, {IncrementalCompiler generator}) async {
+  Future<bool> compile(String filename, ArgResults options, {IncrementalCompiler generator}) async {
     return _compiler.compile(filename, options, generator: generator);
   }
 
@@ -104,8 +104,7 @@ Future<int> starter(
   compiler ??= new _FlutterFrontendCompiler(output, trackWidgetCreation: options['track-widget-creation']);
 
   if (options.rest.isNotEmpty) {
-    await compiler.compile(options.rest[0], options);
-    return 0;
+    return await compiler.compile(options.rest[0], options) ? 0 : 1;
   }
 
   frontend.listenAndCompile(compiler, input ?? stdin, options, () { exit(0); } );
